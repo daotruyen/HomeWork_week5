@@ -10,32 +10,29 @@ export default function App() {
   const [hasErrored, setHasApiError] = useState(false);
   const [lastPageReached, setLastPageReached] = useState(false);
   
-  const getNews = async () => {
-    if (lastPageReached) return;
-    setLoading(true);
-  try {
-    const response = await fetch(
-      `https://newsapi.org/v2/top-headlines?country=us&apiKey=6eec2f7fe6cd4c40a3fef8f33f5778fe&page=${pageNumber}`
-    );
-    const jsonData = await response.json();
-    const hasMoreArticles = jsonData.articles.length > 0;
-if (hasMoreArticles) {
-  const newArticleList = filterForUniqueArticles(
-    articles.concat(jsonData.articles)
-  );
-  setArticles(newArticleList);
-  setPageNumber(pageNumber + 1);
-} else {
-  setLastPageReached(true);
-}
-  } catch (error) {
-    setHasApiError(true);
-  }
-  setLoading(false);
+  const getNews = async (callback) => {
+    try {
+      const response = await fetch(
+        `https://newsapi.org/v2/top-headlines?country=us&apiKey=db7e7b25ac2b4cdaaf3ebd2c8a72b928&page=${pageNumber}`
+      );
+      const JsonData = await response.json();
+      return callback(JsonData.articles);
+    } catch (error) {
+      console.log(error);
+      setHasApiError(true);
+    }
   };
+
   useEffect(() => {
-  getNews();
-}, [articles]);
+    getNews((res) => {
+      const newRes = filterForUniqueArticles(res);
+
+      setArticles(newRes);
+      setLoading(false);
+      setPageNumber((prev) => prev + 1);
+    });
+  }, []);
+
   const renderArticleItem = ({ item }) => {
     {
       articles.map(article => {
